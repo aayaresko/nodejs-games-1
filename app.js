@@ -8,14 +8,23 @@
 'use strict';
 var minimist = require('minimist');
 var argv = minimist(process.argv.slice(2));
-var logFileName = argv['_'][0];
-var fs = require('fs');
+var logFileName = argv['filename'];
 var inquirer = require('inquirer');
 var colors = require('colors/safe');
+var sugar = require('sugar');
+var fs = require('fs');
 var GameObject = require('./components/common/game');
 var GameContainer = require('./components/black_jack/container');
 var User = require('./components/black_jack/user');
-var sugar = require('sugar');
+var Logger = require('./components/common/logger');
+var logger = new Logger({ fileName: logFileName });
+
+if (argv.help) {
+    console.log(colors.yellow("Program stores game results in log file"));
+    console.log(colors.yellow("Default log filename is 'log.txt'."));
+    console.log(colors.yellow("You can specify any filename as '--filename' parameter"));
+    process.exit(0);
+}
 
 var headsOrTailObject = new GameObject(null, run);
 
@@ -34,20 +43,13 @@ headsOrTailObject.runMainPrompt = function() {
         ])
         .then(function(answers) {
                 var random = Number.random(1, 2);
-                if (logFileName) {
-                    fs.appendFile(
-                        logFileName,
-                        JSON.stringify({
-                            guess: answers.guess,
-                            random: random,
-                            date: new Date()
-                        }) + '\n',
-                        function(error) {
-                            if (error) {
-                                console.log(`Some error occurred ${ error }`);
-                            }
-                        });
-                }
+                var data = {
+                    gameId: 1,
+                    player: parseInt(answers.guess),
+                    random: random,
+                    date: new Date()
+                };
+                logger.log(data);
                 if (answers.guess == random) {
                     console.log(colors.green('Correct! You won!'));
                 } else {
@@ -81,9 +83,17 @@ blackJack.runMainPrompt = function() {
         ])
         .then(function( answers ) {
                 var error = 0;
+                var data = null;
                 if (answers.next == 'Hit me!') {
                     error = this.container.hit({ dealer: true, player: true });
                     if (error) {
+                        data = {
+                            gameId: 2,
+                            player: this.container.player.points,
+                            dealer: this.container.dealer.points,
+                            date: new Date()
+                        };
+                        logger.log(data);
                         this.restartPrompt();
                     } else {
                         this.runMainPrompt();
@@ -92,6 +102,12 @@ blackJack.runMainPrompt = function() {
                 if (answers.next == 'Stand') {
                     error = this.container.stand();
                     if (error) {
+                        data = {
+                            player: this.container.player.points,
+                            dealer: this.container.dealer.points,
+                            date: new Date()
+                        };
+                        logger.log(data);
                         this.restartPrompt();
                     } else {
                         this.runMainPrompt();
