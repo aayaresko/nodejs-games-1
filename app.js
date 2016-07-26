@@ -9,13 +9,15 @@
 var minimist = require('minimist');
 var argv = minimist(process.argv.slice(2));
 var logFileName = argv['_'][0];
-var fs = require('fs');
 var inquirer = require('inquirer');
 var colors = require('colors/safe');
 var GameObject = require('./components/common/game');
 var GameContainer = require('./components/black_jack/container');
 var User = require('./components/black_jack/user');
 var sugar = require('sugar');
+var Logger = require('./components/common/logger');
+
+var logger = new Logger(logFileName);
 
 var headsOrTailObject = new GameObject(null, run);
 
