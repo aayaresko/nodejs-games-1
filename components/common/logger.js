@@ -14,6 +14,7 @@
  * @see https://nodejs.org/api/fs.html
  */
 var fs = require('fs');
+var sugar = require('sugar');
 
 function Logger( options ) {
     if (!options.fileName) {
@@ -49,7 +50,7 @@ Logger.prototype.readLogFile = function( fileName, callback ) {
             console.log('some error occurred: ' + error.message);
             //throw error;
         } else {
-            callback(chunk.toString().split('\n'));
+            callback(chunk.lines());
         }
     });
 };
