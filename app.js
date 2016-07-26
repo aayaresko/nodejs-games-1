@@ -19,14 +19,15 @@ var User = require('./components/black_jack/user');
 var Logger = require('./components/common/logger');
 var logger = new Logger({ fileName: logFileName });
 
-if (argv.help) {
+if (argv['help']) {
     console.log(colors.yellow("Program stores game results in log file"));
     console.log(colors.yellow("Default log filename is 'log.txt'."));
     console.log(colors.yellow("You can specify any filename as '--filename' parameter"));
     process.exit(0);
 }
 
-var headsOrTailObject = new GameObject(null, run);
+var headsOrTailObject = new GameObject(1, null, run);
+var blackJack = new GameObject(2, null, run);
 
 headsOrTailObject.runMainPrompt = function() {
     inquirer
@@ -43,30 +44,42 @@ headsOrTailObject.runMainPrompt = function() {
         ])
         .then(function(answers) {
                 var random = Number.random(1, 2);
+                var winner = 0;
+                if (answers.guess == random) {
+                    winner = 2;
+                    console.log(colors.green('Correct! You won!'));
+                } else {
+                    winner = 1;
+                    console.log(colors.red(`Wrong! The number is ${ random }. Please, try again!`));
+                }
                 var data = {
-                    gameId: 1,
+                    gameId: this.id,
                     player: parseInt(answers.guess),
-                    random: random,
+                    game: random,
+                    winner: winner,
                     date: new Date()
                 };
                 logger.log(data);
-                if (answers.guess == random) {
-                    console.log(colors.green('Correct! You won!'));
-                } else {
-                    console.log(colors.red(`Wrong! The number is ${ random }. Please, try again!`));
-                }
                 this.restartPrompt();
             }
             .bind(this)
         );
 };
 
-var blackJack = new GameObject(null, run);
-
 blackJack.init = function() {
     var player = new User('player');
     var dealer = new User('dealer');
     this.container = new GameContainer( player, dealer );
+};
+blackJack.saveResults = function( winner ) {
+    var data = {
+        gameId: this.id,
+        player: this.container.player.points,
+        game: this.container.dealer.points,
+        winner: winner,
+        date: new Date()
+    };
+    logger.log(data);
 };
 blackJack.runMainPrompt = function() {
     inquirer
@@ -82,32 +95,20 @@ blackJack.runMainPrompt = function() {
             }
         ])
         .then(function( answers ) {
-                var error = 0;
-                var data = null;
+                var winner = 0;
                 if (answers.next == 'Hit me!') {
-                    error = this.container.hit({ dealer: true, player: true });
-                    if (error) {
-                        data = {
-                            gameId: 2,
-                            player: this.container.player.points,
-                            dealer: this.container.dealer.points,
-                            date: new Date()
-                        };
-                        logger.log(data);
+                    winner = this.container.hit({ dealer: true, player: true });
+                    if (winner) {
+                        this.saveResults(winner);
                         this.restartPrompt();
                     } else {
                         this.runMainPrompt();
                     }
                 }
                 if (answers.next == 'Stand') {
-                    error = this.container.stand();
-                    if (error) {
-                        data = {
-                            player: this.container.player.points,
-                            dealer: this.container.dealer.points,
-                            date: new Date()
-                        };
-                        logger.log(data);
+                    winner = this.container.stand();
+                    if (winner) {
+                        this.saveResults(winner);
                         this.restartPrompt();
                     } else {
                         this.runMainPrompt();
@@ -121,12 +122,49 @@ blackJack.runMainPrompt = function() {
         );
 };
 blackJack.runActions = function() {
-    var error = this.container.hit({ dealer: true, player: true });
-        error = this.container.hit({ dealer: true, player: true });
-    if (error) {
+    this.container.hit({ dealer: true, player: true });
+    var winner = this.container.hit({ dealer: true, player: true });
+    if (winner) {
+        this.saveResults(winner);
         this.restartPrompt();
     }
 };
+
+function getGameStatistics() {
+    var statistics = [];
+    var container = {
+        wins: 0,
+        total: 0,
+        loose: 0,
+        winSeries: 0,
+        defeatsSeries: 0,
+        wtl: 0
+    };
+    logger.readLogFile(null, function( lines ) {
+        lines.forEach(function( string ) {
+            if (string) {
+                var item = JSON.parse(string);
+                var gameId = item.gameId;
+                if (!statistics[gameId]) {
+                    statistics[gameId] = Object.create(container);
+                }
+                switch (item.winner) {
+                    case 1:
+                        statistics[gameId].loose += 1;
+                        break;
+                    case 2:
+                        statistics[gameId].wins += 1;
+                        break;
+                }
+                statistics[gameId].total += 1;
+            }
+        });
+        statistics.forEach(function( item, index ) {
+            item.wtl = (item.wins / item.loose).round();
+            console.log(colors.blue(`In game with id ${ index } user won ${ item.wins } times and loose ${ item.loose }. Wins/Loose is round to ${ item.wtl }`));
+        });
+    });
+}
 
 function run() {
     inquirer
@@ -138,6 +176,7 @@ function run() {
                 choices: [
                     'Heads or tails',
                     'Black Jack',
+                    'View statistics',
                     'Quit'
                 ]
             }
@@ -151,6 +190,9 @@ function run() {
                     blackJack.init();
                     blackJack.runActions();
                     blackJack.runMainPrompt();
+                    break;
+                case 'View statistics':
+                    getGameStatistics();
                     break;
                 case 'Quit':
                     process.exit(0);

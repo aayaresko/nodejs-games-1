@@ -32,5 +32,16 @@ Logger.prototype.log = function( data ) {
         fs.appendFileSync(this.fileName, string + this.lineSeparator);
     }
 };
+Logger.prototype.readLogFile = function( fileName, callback ) {
+    if (!fileName) {
+        fileName = this.fileName;
+    }
+    fs.readFile(fileName, { encoding: 'utf8', highWaterMark: 4 * 1024 },  function( error, chunk ) {
+        if (error) {
+            throw error;
+        }
+        callback(chunk.toString().split('\n'));
+    });
+};
 
 module.exports = Logger;

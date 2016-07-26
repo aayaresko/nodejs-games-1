@@ -7,7 +7,7 @@
  */
 var inquirer = require('inquirer');
 
-function GameObject( successCallback, failureCallback ) {
+function GameObject( id, successCallback, failureCallback ) {
     if (!successCallback) {
         successCallback =
             function() {
@@ -25,6 +25,7 @@ function GameObject( successCallback, failureCallback ) {
     }
     this.successCallback = successCallback;
     this.failureCallback = failureCallback;
+    this.id = id;
 }
 GameObject.prototype.init = function() {};
 GameObject.prototype.runActions = function() {};

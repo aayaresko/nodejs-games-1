@@ -14,15 +14,15 @@ function Container( player, dealer ) {
 }
 Container.prototype.hit = function( options ) {
     if (options.dealer) {
-        this.dealer.hitMe(Number.random(1, 10));
+        this.dealer.hitMe(Number.random(1, 11));
     }
     if (options.player) {
-        this.player.hitMe(Number.random(1, 10));
+        this.player.hitMe(Number.random(1, 11));
     }
     if (this.dealer.points == 21 && this.player.points == 21) {
         console.log(colors.green('Push'));
         this.printStatus();
-        return 1;
+        return 3;
     } else if (this.dealer.points == 21) {
         console.log(colors.red('Dealer wins'));
         this.printStatus();
@@ -30,7 +30,7 @@ Container.prototype.hit = function( options ) {
     } else if (this.player.points == 21) {
         console.log(colors.green('Player wins'));
         this.printStatus();
-        return 1;
+        return 2;
     } else if (this.player.points > 21 && this.dealer.points < 21) {
         console.log(colors.red('Dealer wins'));
         this.printStatus();
@@ -38,11 +38,11 @@ Container.prototype.hit = function( options ) {
     } else if (this.player.points < 21 && this.dealer.points > 21) {
         console.log(colors.green('Player wins'));
         this.printStatus();
-        return 1;
+        return 2;
     } else if (this.dealer.points > 21 && this.player.points > 21) {
         console.log(colors.green('Push'));
         this.printStatus();
-        return 1;
+        return 3;
     } else {
         this.printStatus('default', true);
     }
@@ -65,7 +65,7 @@ Container.prototype.stand = function() {
             ) {
                 console.log(colors.green('Player wins'));
                 this.printStatus();
-                return 1;
+                return 2;
             }
         }
     }
