@@ -6,20 +6,31 @@
  * Created by aayaresko on 26.07.16.
  */
 var fs = require('fs');
-function Init( logFileName, data ) {
-    this.fileName = logFileName;
-}
-Init.prototype.log = function( data ) {
-    if (logFileName) {
-        fs.appendFile(
-            logFileName,
-            JSON.stringify(data) + '\n',
-            function(error) {
-                if (error) {
-                    console.log(`Some error occurred ${ error }`);
-                }
-            });
-    }
-}
 
-module.exports = init;
+function Logger( options ) {
+    if (!options.fileName) {
+        options.fileName = 'log.txt';
+    }
+    if (!options.lineSeparator) {
+        options.lineSeparator = '\n'
+    }
+    this.fileName = options.fileName;
+    this.lineSeparator = options.lineSeparator;
+}
+Logger.prototype.log = function( data ) {
+    if (this.fileName) {
+        var string = null;
+        var type = typeof data;
+        switch (type) {
+            case 'object':
+                string = JSON.stringify(data);
+                break;
+            default:
+                string = data;
+
+        }
+        fs.appendFileSync(this.fileName, string + this.lineSeparator);
+    }
+};
+
+module.exports = Logger;
