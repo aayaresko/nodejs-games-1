@@ -4,6 +4,18 @@
 
 /**
  * Created by aayaresko on 25.07.16.
+ * Main game module.
+ *
+ * This module run the game, controls game start and restart.
+ * Renders game menus.
+ * Shows statistical information saved in logfile.
+ * Shows help information.
+ * This module can run:
+ * * Heads or tails;
+ * * BlackJack.
+ * To view help information type '--help' parameter.
+ * To specify a logfile name type '--logfile=my_log.txt' parameter.
+ *
  */
 'use strict';
 var minimist = require('minimist');
@@ -135,7 +147,7 @@ function getGameStatistics() {
     var container = {
         wins: 0,
         total: 0,
-        loose: 0,
+        lose: 0,
         winSeries: 0,
         defeatsSeries: 0,
         wtl: 0
@@ -150,7 +162,7 @@ function getGameStatistics() {
                 }
                 switch (item.winner) {
                     case 1:
-                        statistics[gameId].loose += 1;
+                        statistics[gameId].lose += 1;
                         break;
                     case 2:
                         statistics[gameId].wins += 1;
@@ -160,8 +172,8 @@ function getGameStatistics() {
             }
         });
         statistics.forEach(function( item, index ) {
-            item.wtl = (item.wins / item.loose).round();
-            console.log(colors.blue(`In game with id ${ index } user won ${ item.wins } times and loose ${ item.loose }. Wins/Loose is round to ${ item.wtl }`));
+            item.wtl = (item.wins / item.lose).round();
+            console.log(colors.blue(`In game with id ${ index } user won ${ item.wins } times and lose ${ item.lose }. Wins/Lose is round to ${ item.wtl }`));
         });
     });
 }

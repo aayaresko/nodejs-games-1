@@ -4,6 +4,13 @@
 
 /**
  * Created by aayaresko on 26.07.16.
+ * Logger component.
+ *
+ * This component is used to simplify logging process.
+ * Specified items will be saved to a log file (synchronously).
+ * If specified item is an object, logger will convert it into a JSON string.
+ * It may read log file (asynchronously). In this case it will return the data as an array of strings.
+ *
  */
 var fs = require('fs');
 
@@ -38,9 +45,11 @@ Logger.prototype.readLogFile = function( fileName, callback ) {
     }
     fs.readFile(fileName, { encoding: 'utf8', highWaterMark: 4 * 1024 },  function( error, chunk ) {
         if (error) {
-            throw error;
+            console.log('some error occurred: ' + error.message);
+            //throw error;
+        } else {
+            callback(chunk.toString().split('\n'));
         }
-        callback(chunk.toString().split('\n'));
     });
 };
 

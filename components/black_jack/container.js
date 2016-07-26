@@ -4,6 +4,17 @@
 
 /**
  * Created by aayaresko on 25.07.16.
+ * BlackJack container.
+ *
+ * This component holds all game logic for a BlackJack game.
+ * It controls game process and determine winner and loser.
+ * It prints current game status and game results automatically.
+ * The return value of method [[stand()]] and [[hit()]]:
+ * * 1 dealer wins
+ * * 2 player wins
+ * * 3 push
+ * This module follows the BlackJack logic as much as possible.
+ *
  */
 var colors = require('colors/safe');
 var sugar = require('sugar');

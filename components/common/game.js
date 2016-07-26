@@ -4,6 +4,11 @@
 
 /**
  * Created by aayaresko on 25.07.16.
+ * Game component.
+ *
+ * This component is used to store the game data.
+ * It contains methods and properties common to all games.
+ *
  */
 var inquirer = require('inquirer');
 
