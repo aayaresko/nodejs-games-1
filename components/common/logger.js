@@ -11,6 +11,7 @@
  * If specified item is an object, logger will convert it into a JSON string.
  * It may read log file (asynchronously). In this case it will return the data as an array of strings.
  *
+ * @see https://nodejs.org/api/fs.html
  */
 var fs = require('fs');
 
