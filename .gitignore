@@ -43,3 +43,6 @@ jspm_packages
 
 # Ignore trash bin
 tmp
+
+# Ignore -compiled.js files
+*-compiled.js*
